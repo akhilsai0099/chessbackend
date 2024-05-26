@@ -46,22 +46,16 @@ export class Game {
 
   public makeMove(socket: WebSocket, move: { from: string; to: string }) {
     if (this.player1 === null || this.player2 === null) {
-      console.log("early return 0");
       return;
     }
     if (this.board.turn() === "w" && socket !== this.player1) {
-      console.log("early return 1");
       return;
     }
     if (this.board.turn() === "b" && socket !== this.player2) {
-      console.log("early return 2");
       return;
     }
     try {
-      console.log(move);
-      // console.log("control reached here");
       this.board.move(move);
-      console.log(this.board.fen());
     } catch (e) {
       return;
     }
@@ -75,8 +69,13 @@ export class Game {
       );
       return;
     }
-
-    this.player1.send(JSON.stringify({ type: UPDATE, fen: this.board.fen() }));
-    this.player2.send(JSON.stringify({ type: UPDATE, fen: this.board.fen() }));
+    if (socket === this.player1)
+      this.player2.send(
+        JSON.stringify({ type: UPDATE, move: move, fen: this.board.fen() })
+      );
+    if (socket === this.player2)
+      this.player1.send(
+        JSON.stringify({ type: UPDATE, move: move, fen: this.board.fen() })
+      );
   }
 }
